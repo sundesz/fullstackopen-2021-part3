@@ -19,7 +19,7 @@ POST http://localhost:3001/api/persons
 Content-Type: application/json
 
 {
-  "name": "Sandesh Hyojuxxx",
+  "name": "Sandesh Hyoju",
   "number": "046-6137328"
 }
 
@@ -28,5 +28,14 @@ POST http://localhost:3001/api/persons
 Content-Type: application/json
 
 {
-  "name": "Sandesh Hyoju"
+  "name": "Sandesh Hyojufdgfdg"
+}
+
+###
+PUT http://localhost:3001/api/persons/61abe5764eb80cd5941354cc
+Content-Type: application/json
+
+{
+  "name": "la",
+  "number": "046-6137328"
 }
