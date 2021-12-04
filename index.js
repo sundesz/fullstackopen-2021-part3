@@ -31,6 +31,7 @@ const generateId = () => Math.floor(Math.random() * 100000)
 
 app.use(cors())
 app.use(express.json())
+app.use(express.static('build'))
 
 morgan.token('body', function getBody(req) {
   return JSON.stringify(req.body)
