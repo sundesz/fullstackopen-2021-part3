@@ -36,6 +36,6 @@ PUT http://localhost:3001/api/persons/61abe5764eb80cd5941354cc
 Content-Type: application/json
 
 {
-  "name": "la",
+  "name": "ba",
   "number": "046-6137328"
 }
