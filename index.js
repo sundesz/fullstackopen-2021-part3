@@ -22,41 +22,39 @@ app.get('/', (req, res) => {
   res.send('<h1>Sandesh Hyoju</>')
 })
 
-app.get('/info', (req, res) => {
-  res.send(`
-  <div>Phonebook has info for ${persons.length} people </div>
-  <p>${new Date()}</>
-  `)
+app.get('/info', (req, res, next) => {
+  Person.count()
+    .then((count) =>
+      res.send(
+        `<div>Phonebook has info for ${count} people </div><p>${new Date()}</>`
+      )
+    )
+    .catch((err) => next(err))
 })
 
-app.get('/api/persons', (req, res) => {
-  Person.find({}).then((persons) => {
-    res.json(persons)
-  })
+app.get('/api/persons', (req, res, next) => {
+  Person.find({})
+    .then((persons) => {
+      res.json(persons)
+    })
+    .catch((err) => next(err))
 })
 
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
   Person.findById(req.params.id)
     .then((person) => {
-      res.json(person)
+      person ? res.json(person) : res.status(404).end()
     })
-    .catch((error) => console.log(error.message))
+    .catch((err) => next(err))
 })
 
-app.delete('/api/persons/:id', (req, res) => {
+app.delete('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndDelete(req.params.id)
-  const id = Number(req.params.id)
-  const person = persons.find((p) => p.id === id)
-
-  if (person) {
-    persons = persons.filter((p) => p.id !== id)
-    return res.status(204).end()
-  }
-
-  res.status(404).end()
+    .then((response) => res.status(204).end())
+    .catch((err) => next(err))
 })
 
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
   const body = req.body
 
   if (!body.name || !body.number) {
@@ -64,8 +62,22 @@ app.post('/api/persons', (req, res) => {
   }
 
   const person = new Person({ name: body.name, number: body.number })
+  person
+    .save()
+    .then((savedPerson) => res.json(savedPerson))
+    .catch((err) => next(err))
+})
 
-  person.save().then((savedPerson) => res.json(savedPerson))
+app.put('/api/persons/:id', (req, res, next) => {
+  const body = req.body
+
+  Person.findByIdAndUpdate(
+    req.params.id,
+    { name: body.name, number: body.number },
+    { new: true }
+  )
+    .then((savedPerson) => res.json(savedPerson))
+    .catch((err) => next(err))
 })
 
 const unknownEndPoint = (req, res) => {
@@ -73,6 +85,15 @@ const unknownEndPoint = (req, res) => {
 }
 
 app.use(unknownEndPoint)
+
+const errorHandler = (err, req, res, next) => {
+  if (err.name === 'CastError') {
+    return res.status(400).json({ error: 'malformatted id' })
+  }
+
+  next(err)
+}
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
